@@ -568,7 +568,36 @@
     settings.captureMode = v; saveSettings(); captureSeg.set(v); $('live').classList.toggle('single', v === 'single');
   });
 
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) $('btn-live').hidden = false;
+  // Dentro de claude.ai (u otro marco) el navegador bloquea la cámara:
+  // se avisa y se ofrece el link a la versión publicada.
+  var embedded = !!window.claude;
+  try { embedded = embedded || window.self !== window.top; } catch (e) { embedded = true; }
+  if (embedded) {
+    $('embed-notice').hidden = false;
+    $('lbl-native').hidden = true;
+  } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    $('btn-live').hidden = false;
+  }
+  $('copy-link').addEventListener('click', function () {
+    var link = $('site-link');
+    var done = function () { toast('Link copiado. Pégalo en Chrome o Safari.'); };
+    var fallback = function () {
+      var r = document.createRange(); r.selectNodeContents(link);
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      toast('Link seleccionado: cópialo y ábrelo en el navegador.');
+    };
+    try { navigator.clipboard.writeText(link.href).then(done, fallback); } catch (e) { fallback(); }
+  });
+
+  function cameraError(e) {
+    var name = e && e.name;
+    if (name === 'NotAllowedError' || name === 'SecurityError') {
+      return 'No hay permiso para la cámara. Toca el candado junto a la dirección, permite la Cámara y vuelve a intentar.';
+    }
+    if (name === 'NotFoundError' || name === 'OverconstrainedError') return 'No se encontró una cámara en este equipo.';
+    if (name === 'NotReadableError') return 'Otra app está usando la cámara. Ciérrala y vuelve a intentar.';
+    return 'No se pudo abrir la cámara en vivo. Usa "Cámara del teléfono".';
+  }
 
   $('btn-live').addEventListener('click', openLive);
 
@@ -579,8 +608,8 @@
         video: { facingMode: { ideal: 'environment' }, width: { ideal: 3840 }, height: { ideal: 2160 } }
       });
     } catch (e) {
-      $('btn-live').hidden = true;
-      toast('No se pudo abrir la cámara en vivo aquí. Usa "Cámara del teléfono".');
+      console.error(e);
+      toast(cameraError(e));
       return;
     }
     removeSamples();
@@ -824,7 +853,7 @@
     btn.onclick = action ? function () { el.hidden = true; action(); } : null;
     el.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { el.hidden = true; }, actionLabel ? 6000 : 3500);
+    toastTimer = setTimeout(function () { el.hidden = true; }, Math.max(actionLabel ? 6000 : 3500, msg.length * 70));
   }
 
   /* ---------- Teclado ---------- */

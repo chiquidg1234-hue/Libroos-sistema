@@ -296,6 +296,12 @@ svg { flex: none; }
 .check span { display: grid; gap: 2px; }
 .check small { color: var(--muted); font-size: 13px; }
 
+.notice { display: grid; gap: 8px; padding: 14px 16px; border-radius: var(--radius); background: #f7e3b5; color: #3d2a00; }
+.notice a { color: inherit; font-weight: 600; word-break: break-all; }
+.notice-link { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.notice .btn { background: #fff8e6; border-color: #d9b865; color: #3d2a00; }
+.notice-small { font-size: 13px; }
+
 /* Aviso */
 .toast {
   position: fixed; left: 50%; transform: translateX(-50%); z-index: 50;
