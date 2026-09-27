@@ -291,6 +291,11 @@ svg { flex: none; }
 .sheet-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .sheet-actions .btn { flex: 1; }
 
+.check { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.check input { width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--accent); flex: none; }
+.check span { display: grid; gap: 2px; }
+.check small { color: var(--muted); font-size: 13px; }
+
 /* Aviso */
 .toast {
   position: fixed; left: 50%; transform: translateX(-50%); z-index: 50;

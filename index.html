@@ -209,6 +209,10 @@
       </div>
       <small class="field-note" id="quality-note"></small>
     </fieldset>
+    <label class="check">
+      <input type="checkbox" id="pdf-ocr">
+      <span><b>Texto buscable (OCR)</b><small>Reconoce el texto en español: podrás buscar palabras, seleccionar y copiar dentro del PDF. Tarda unos segundos por página.</small></span>
+    </label>
     <div class="sheet-progress" id="pdf-progress" hidden>
       <div class="meter"><div class="meter-fill" id="pdf-meter"></div></div>
       <span id="pdf-progress-text">Preparando…</span>
@@ -218,6 +222,7 @@
       <div class="sheet-actions">
         <button type="button" class="btn btn-primary" id="pdf-download">Descargar PDF</button>
         <button type="button" class="btn" id="pdf-share" hidden>Compartir</button>
+        <button type="button" class="btn" id="pdf-text" hidden>Descargar texto</button>
       </div>
     </div>
     <button type="submit" class="btn btn-primary btn-block" id="pdf-build">Crear PDF</button>
@@ -234,6 +239,7 @@
 <script src="js/imaging.js"></script>
 <script src="js/store.js"></script>
 <script src="js/pdf.js"></script>
+<script src="js/ocr.js"></script>
 <script src="js/sample.js"></script>
 <script src="js/app.js"></script>
 </body>

@@ -20,7 +20,7 @@
   var $ = function (id) { return document.getElementById(id); };
 
   /* ---------- Preferencias ---------- */
-  var settings = { captureMode: 'double', filter: 'color', pdfSize: 'photo', pdfQuality: 'medium', pdfName: '', sampleShown: false };
+  var settings = { captureMode: 'double', filter: 'color', pdfSize: 'photo', pdfQuality: 'medium', pdfName: '', sampleShown: false, ocr: true };
   try {
     var saved = JSON.parse(localStorage.getItem('libroos-settings') || '{}');
     Object.keys(settings).forEach(function (k) { if (k in saved) settings[k] = saved[k]; });
@@ -675,7 +675,7 @@
   });
 
   /* ---------- Exportar ---------- */
-  var pdfBlob = null, pdfFile = '';
+  var pdfBlob = null, pdfFile = '', pdfText = '';
   var sizeSeg = seg($('pdf-size'), settings.pdfSize, function (v) { settings.pdfSize = v; saveSettings(); resetResult(); });
   var qualSeg = seg($('pdf-quality'), settings.pdfQuality, function (v) { settings.pdfQuality = v; saveSettings(); updateQualityNote(); resetResult(); });
 
@@ -686,7 +686,9 @@
   function updateQualityNote() {
     var q = QUALITY[settings.pdfQuality], pages = totals();
     var mb = pages * q.perPage * (settings.filter === 'bw' ? 0.6 : 1);
-    $('quality-note').textContent = q.note + ' Unos ' + (mb < 1 ? mb.toFixed(1) : Math.round(mb)) + ' MB para ' + pages + (pages === 1 ? ' página.' : ' páginas.');
+    var secs = pages * (settings.ocr ? 5 : 0.6);
+    var time = secs < 60 ? 'menos de 1 minuto' : 'unos ' + Math.round(secs / 60) + ' min';
+    $('quality-note').textContent = q.note + ' Unos ' + (mb < 1 ? mb.toFixed(1) : Math.round(mb)) + ' MB para ' + pages + (pages === 1 ? ' página' : ' páginas') + ', ' + time + '.';
   }
   function resetResult() { pdfBlob = null; $('pdf-result').hidden = true; $('pdf-build').hidden = false; }
 
@@ -694,6 +696,7 @@
     $('pdf-name').value = settings.pdfName || defaultName();
     sizeSeg.set(settings.pdfSize);
     qualSeg.set(settings.pdfQuality);
+    $('pdf-ocr').checked = !!settings.ocr;
     updateQualityNote();
     resetResult();
     $('pdf-progress').hidden = true;
@@ -705,6 +708,7 @@
   $('btn-export').addEventListener('click', openSheet);
   $('sheet-close').addEventListener('click', closeSheet);
   $('sheet').addEventListener('click', function (e) { if (e.target === this) closeSheet(); });
+  $('pdf-ocr').addEventListener('change', function () { settings.ocr = this.checked; saveSettings(); updateQualityNote(); resetResult(); });
   $('pdf-name').addEventListener('input', function () { settings.pdfName = this.value.trim(); saveSettings(); resetResult(); });
 
   var buildingPdf = false;
@@ -722,8 +726,17 @@
     $('pdf-meter').style.width = '0';
     $('pdf-progress-text').textContent = 'Preparando página 1 de ' + jobs.length + '…';
     try {
+      var useOcr = settings.ocr && window.LibroosOcr;
+      var phase = '';
+      if (useOcr) {
+        $('pdf-progress-text').textContent = 'Cargando el lector de texto…';
+        try { await window.LibroosOcr.warmUp(); } catch (err) {
+          useOcr = false;
+          toast('No se pudo cargar el lector de texto; el PDF se crea sin OCR.');
+        }
+      }
       var name = ($('pdf-name').value.trim() || defaultName()).replace(/[\\/:*?"<>|]+/g, '-');
-      pdfBlob = await Pdf.build(async function (k) {
+      var result = await Pdf.build(async function (k) {
         var job = jobs[k];
         if (cache.id !== job.rec.id) {
           var src = await decodeBlob(job.rec.blob);
@@ -733,13 +746,23 @@
           full.width = full.height = 0;
         }
         return cache.pages[job.i];
-      }, { count: jobs.length, size: settings.pdfSize, jpegQuality: q.q, title: name }, function (done, total) {
+      }, {
+        count: jobs.length, size: settings.pdfSize, jpegQuality: q.q, title: name,
+        ocr: useOcr ? function (canvas, k) {
+          $('pdf-progress-text').textContent = 'Leyendo el texto de la página ' + (k + 1) + ' de ' + jobs.length + '…';
+          return window.LibroosOcr.recognize(canvas).catch(function (err) { console.error(err); return null; });
+        } : null
+      }, function (done, total) {
         $('pdf-meter').style.width = (done / total * 100) + '%';
         $('pdf-progress-text').textContent = done < total ? 'Página ' + (done + 1) + ' de ' + total + '…' : 'Armando el archivo…';
       });
+      pdfBlob = result.blob;
+      pdfText = result.text;
+      if (useOcr) window.LibroosOcr.terminate();
       pdfFile = name + '.pdf';
       var mb = pdfBlob.size / 1048576;
-      $('pdf-result-text').textContent = 'Listo: ' + jobs.length + (jobs.length === 1 ? ' página, ' : ' páginas, ') + (mb < 1 ? mb.toFixed(2) : mb.toFixed(1)) + ' MB.';
+      $('pdf-result-text').textContent = 'Listo: ' + jobs.length + (jobs.length === 1 ? ' página, ' : ' páginas, ') + (mb < 1 ? mb.toFixed(2) : mb.toFixed(1)) + ' MB' + (pdfText ? ', con texto buscable.' : '.');
+      $('pdf-text').hidden = !pdfText;
       $('pdf-result').hidden = false;
       $('pdf-build').hidden = true;
       var file = new File([pdfBlob], pdfFile, { type: 'application/pdf' });
@@ -778,6 +801,12 @@
     if (!pdfBlob) return;
     var ok = await saveFile(pdfBlob, pdfFile);
     if (ok) toast('Descargando ' + pdfFile);
+  });
+  $('pdf-text').addEventListener('click', async function () {
+    if (!pdfText) return;
+    var file = pdfFile.replace(/\.pdf$/, '.txt');
+    var ok = await saveFile(new Blob([pdfText], { type: 'text/plain;charset=utf-8' }), file);
+    if (ok) toast('Descargando ' + file);
   });
   $('pdf-share').addEventListener('click', function () {
     if (!pdfBlob) return;

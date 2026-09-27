@@ -14,7 +14,8 @@ Es una app web: funciona en el navegador del celular o la computadora, **sin ser
 | 4. Enderezar | Corrige la perspectiva de cada página (si la foto se tomó en ángulo, queda rectangular). |
 | 5. Acabado | **Escáner** (papel blanco, sin sombra del lomo, conserva colores), **Grises**, **B/N** (texto nítido, archivo liviano) u **Original**. Se elige para todo el libro y se puede cambiar por foto. |
 | 6. Ordenar | Numeración de páginas automática, mover fotos antes/después, eliminar con "Deshacer". |
-| 7. PDF | Nombre del archivo, tamaño de hoja (como el libro, A4 o Carta) y calidad (Alta / Media / Liviana). Botón **Descargar PDF** y, en el celular, **Compartir** (WhatsApp, Drive, correo…). |
+| 7. OCR | Opción **Texto buscable**: reconoce el texto en español (Tesseract, dentro del teléfono) y lo agrega como capa invisible. En el PDF puedes buscar palabras, seleccionar y copiar. También se puede bajar todo el texto como `.txt`. |
+| 8. PDF | Nombre del archivo, tamaño de hoja (como el libro, A4 o Carta) y calidad (Alta / Media / Liviana). Botón **Descargar PDF** y, en el celular, **Compartir** (WhatsApp, Drive, correo…). |
 
 Las fotos quedan guardadas en el navegador (IndexedDB): si el teléfono recarga la página al abrir la cámara, no se pierde nada. Una vez abierta, la app funciona sin conexión y se puede instalar en la pantalla de inicio.
 
@@ -53,10 +54,12 @@ index.html            interfaz
 css/styles.css        estilos (tema claro y oscuro)
 js/imaging.js         detección de bordes y lomo, perspectiva, filtros (funciones puras)
 js/store.js           guardado en IndexedDB
-js/pdf.js             armado del PDF (jsPDF)
+js/pdf.js             armado del PDF (jsPDF) con capa de texto invisible
+js/ocr.js             reconocimiento de texto (Tesseract.js, español)
 js/sample.js          foto de ejemplo generada
 js/app.js             captura, lista, editor, exportación
 vendor/jspdf.umd.min.js  jsPDF 2.5.2 (MIT), incluido para funcionar sin conexión
+vendor/tesseract/     Tesseract.js 5.1.1 (Apache-2.0) + datos de español (se carga solo al usar OCR)
 sw.js, manifest.webmanifest  app instalable y sin conexión
 tests/                pruebas del procesamiento de imagen (`npm test`)
 ```
