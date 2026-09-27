@@ -1,0 +1,11 @@
+{
+  "name": "libroos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fotografía un libro abierto, separa las páginas y crea un PDF. Todo en el navegador.",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "start": "npx --yes http-server -c-1 -p 8080 ."
+  },
+  "license": "MIT"
+}

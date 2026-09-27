@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Libroos</title>
+<meta name="description" content="Fotografía un libro abierto, separa las dos páginas automáticamente y descárgalo como PDF.">
+<meta name="theme-color" content="#1f6b57">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,600;7..72,700&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<!-- APP:START -->
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 7c4-2 8-2 13 1v19c-5-3-9-3-13-1z" fill="currentColor" opacity=".35"/><path d="M29 7c-4-2-8-2-13 1v19c5-3 9-3 13-1z" fill="currentColor"/></svg>
+      <div>
+        <h1>Libroos</h1>
+        <p class="tagline">Libro abierto → páginas → PDF</p>
+      </div>
+    </div>
+    <div class="count" id="count" aria-live="polite"><b>0</b> págs.</div>
+  </header>
+
+  <main class="main">
+    <section class="capture" aria-labelledby="cap-title">
+      <h2 id="cap-title">Fotografía el libro abierto</h2>
+      <p class="lead">Una foto con las dos páginas; Libroos las separa por el lomo, las endereza y les deja el papel blanco.</p>
+
+      <div class="field-row">
+        <span class="field-label" id="mode-label">Cada foto tiene</span>
+        <div class="seg" role="radiogroup" aria-labelledby="mode-label" id="capture-mode">
+          <button type="button" role="radio" data-value="double">2 páginas</button>
+          <button type="button" role="radio" data-value="single">1 página</button>
+        </div>
+      </div>
+
+      <div class="capture-buttons">
+        <button type="button" class="btn btn-primary btn-big" id="btn-live" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          Cámara continua
+          <small>Varias fotos seguidas con guía para el lomo</small>
+        </button>
+        <label class="btn btn-big" id="lbl-native">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="17.5" r="1.2" fill="currentColor"/></svg>
+          Cámara del teléfono
+          <small>Máxima calidad, una foto a la vez</small>
+          <input type="file" id="in-camera" accept="image/*" capture="environment" hidden>
+        </label>
+        <label class="btn btn-big">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 16l5-5 4 4 3-3 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          Subir fotos
+          <small>Elige muchas de la galería a la vez</small>
+          <input type="file" id="in-files" accept="image/*" multiple hidden>
+        </label>
+      </div>
+
+      <details class="tips">
+        <summary>Consejos para fotos que se lean bien</summary>
+        <ul>
+          <li>Luz pareja, de frente o de arriba. Apaga el flash: hace brillos en el papel.</li>
+          <li>Apoya el libro sobre una superficie oscura; así Libroos encuentra los bordes solo.</li>
+          <li>Pon el celular horizontal y alinea el lomo con la línea central.</li>
+          <li>Aplana las páginas con los dedos en los márgenes; después puedes recortarlos.</li>
+          <li>Si una foto queda mal separada, tócala y arrastra los puntos.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="book" aria-labelledby="book-title">
+      <div class="book-head">
+        <h2 id="book-title">Tu libro</h2>
+        <div class="field-row">
+          <span class="field-label" id="filter-label">Acabado</span>
+          <div class="seg seg-wide" role="radiogroup" aria-labelledby="filter-label" id="global-filter">
+            <button type="button" role="radio" data-value="color">Escáner</button>
+            <button type="button" role="radio" data-value="gray">Grises</button>
+            <button type="button" role="radio" data-value="bw">B/N</button>
+            <button type="button" role="radio" data-value="original">Original</button>
+          </div>
+        </div>
+      </div>
+      <p class="progress-line" id="import-progress" hidden></p>
+      <ol class="spreads" id="spreads"></ol>
+      <div class="empty" id="empty" hidden>
+        <p>Todavía no hay fotos. Toma la primera foto del libro abierto o sube las que ya tienes.</p>
+        <button type="button" class="btn" id="btn-sample">Ver un ejemplo</button>
+      </div>
+      <div class="book-foot" id="book-foot" hidden>
+        <button type="button" class="btn btn-quiet" id="btn-clear">Borrar todas las fotos</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="bar">
+    <div class="bar-info"><b id="bar-pages">0</b> páginas<br><span id="bar-photos">0 fotos</span></div>
+    <button type="button" class="btn btn-primary" id="btn-export" disabled>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h8l4 4v15H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v7m-3-3l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Crear PDF
+    </button>
+  </div>
+</div>
+
+<!-- Editor de una foto -->
+<div class="editor" id="editor" hidden role="dialog" aria-modal="true" aria-labelledby="ed-title">
+  <div class="ed-top">
+    <button type="button" class="icon-btn" id="ed-close" aria-label="Volver">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <h2 id="ed-title">Foto 1</h2>
+    <button type="button" class="btn btn-primary btn-small" id="ed-done">Listo</button>
+  </div>
+  <div class="ed-stage" id="ed-stage">
+    <div class="ed-frame" id="ed-frame">
+      <canvas id="ed-canvas"></canvas>
+      <svg id="ed-overlay" aria-label="Arrastra los puntos para marcar las esquinas y el lomo"></svg>
+    </div>
+    <canvas class="loupe" id="ed-loupe" width="240" height="240" hidden></canvas>
+  </div>
+  <div class="ed-panel">
+    <p class="ed-hint" id="ed-hint">Arrastra los puntos a las esquinas del libro. Los puntos del centro marcan el lomo.</p>
+    <div class="ed-tools">
+      <div class="seg" role="radiogroup" aria-label="Páginas en esta foto" id="ed-mode">
+        <button type="button" role="radio" data-value="double">2 págs.</button>
+        <button type="button" role="radio" data-value="single">1 pág.</button>
+      </div>
+      <button type="button" class="btn btn-small" id="ed-rotate">Girar</button>
+      <button type="button" class="btn btn-small" id="ed-auto">Auto</button>
+      <button type="button" class="btn btn-small" id="ed-full">Foto entera</button>
+      <label class="select-wrap">
+        <span class="sr-only">Acabado de esta foto</span>
+        <select id="ed-filter">
+          <option value="">Acabado general</option>
+          <option value="color">Escáner</option>
+          <option value="gray">Grises</option>
+          <option value="bw">Blanco y negro</option>
+          <option value="original">Original</option>
+        </select>
+      </label>
+    </div>
+    <div class="ed-preview" id="ed-preview" aria-live="polite"></div>
+    <button type="button" class="btn btn-danger btn-small" id="ed-delete">Eliminar esta foto</button>
+  </div>
+</div>
+
+<!-- Cámara continua -->
+<div class="live" id="live" hidden role="dialog" aria-modal="true" aria-label="Cámara">
+  <video id="live-video" playsinline muted autoplay></video>
+  <div class="live-guide" id="live-guide" aria-hidden="true">
+    <div class="guide-frame"></div>
+    <div class="guide-spine"></div>
+  </div>
+  <div class="live-top">
+    <button type="button" class="icon-btn icon-btn-dark" id="live-close" aria-label="Cerrar cámara">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <span class="live-tip" id="live-tip">Alinea el lomo con la línea</span>
+    <button type="button" class="icon-btn icon-btn-dark" id="live-torch" aria-label="Linterna" aria-pressed="false" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2h8l-2 6h-4zM10 8h4v13h-4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+  <div class="live-bottom">
+    <div class="live-last">
+      <img id="live-thumb" alt="" hidden>
+      <span id="live-count">0</span>
+    </div>
+    <button type="button" class="shutter" id="live-shutter" aria-label="Tomar foto"></button>
+    <div class="seg seg-dark" role="radiogroup" aria-label="Páginas por foto" id="live-mode">
+      <button type="button" role="radio" data-value="double">2</button>
+      <button type="button" role="radio" data-value="single">1</button>
+    </div>
+  </div>
+  <div class="live-flash" id="live-flash"></div>
+</div>
+
+<!-- Crear PDF -->
+<div class="sheet-backdrop" id="sheet" hidden>
+  <form class="sheet" id="export-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-head">
+      <h2 id="sheet-title">Crear PDF</h2>
+      <button type="button" class="icon-btn" id="sheet-close" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <label class="field">
+      <span class="field-title">Nombre del archivo</span>
+      <span class="input-suffix"><input type="text" id="pdf-name" autocomplete="off" spellcheck="false"><em>.pdf</em></span>
+    </label>
+    <fieldset class="field">
+      <legend>Tamaño de hoja</legend>
+      <div class="seg seg-wide" role="radiogroup" id="pdf-size">
+        <button type="button" role="radio" data-value="photo">Como el libro</button>
+        <button type="button" role="radio" data-value="a4">A4</button>
+        <button type="button" role="radio" data-value="letter">Carta</button>
+      </div>
+    </fieldset>
+    <fieldset class="field">
+      <legend>Calidad</legend>
+      <div class="seg seg-wide" role="radiogroup" id="pdf-quality">
+        <button type="button" role="radio" data-value="high">Alta</button>
+        <button type="button" role="radio" data-value="medium">Media</button>
+        <button type="button" role="radio" data-value="low">Liviana</button>
+      </div>
+      <small class="field-note" id="quality-note"></small>
+    </fieldset>
+    <div class="sheet-progress" id="pdf-progress" hidden>
+      <div class="meter"><div class="meter-fill" id="pdf-meter"></div></div>
+      <span id="pdf-progress-text">Preparando…</span>
+    </div>
+    <div class="sheet-result" id="pdf-result" hidden>
+      <p id="pdf-result-text"></p>
+      <div class="sheet-actions">
+        <button type="button" class="btn btn-primary" id="pdf-download">Descargar PDF</button>
+        <button type="button" class="btn" id="pdf-share" hidden>Compartir</button>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block" id="pdf-build">Crear PDF</button>
+  </form>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden>
+  <span id="toast-text"></span>
+  <button type="button" id="toast-action" hidden></button>
+</div>
+<!-- APP:END -->
+
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="js/imaging.js"></script>
+<script src="js/store.js"></script>
+<script src="js/pdf.js"></script>
+<script src="js/sample.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
