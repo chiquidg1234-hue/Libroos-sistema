@@ -1,5 +1,5 @@
 // Libroos · funciona sin conexión una vez abierto.
-const CACHE = 'libroos-v3';
+const CACHE = 'libroos-v4';
 const SHELL = [
   './', 'index.html', 'css/styles.css', 'manifest.webmanifest',
   'js/imaging.js', 'js/store.js', 'js/pdf.js', 'js/ocr.js', 'js/sample.js', 'js/app.js',

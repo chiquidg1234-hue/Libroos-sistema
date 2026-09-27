@@ -111,46 +111,45 @@
   }
 
   /*
-   * El lomo suele ser un valle oscuro vertical cerca del centro.
-   * Se mide por separado en la mitad superior e inferior para seguir
-   * un lomo algo inclinado. Devuelve x en el borde superior e inferior.
+   * El lomo suele ser un valle oscuro horizontal cerca del centro.
+   * Se mide por separado en la mitad izquierda y derecha para seguir
+   * un lomo algo inclinado. Devuelve y en el borde izquierdo y derecho.
    */
   function detectSpine(gray, w, h, b) {
     b = b || { x0: 0, y0: 0, x1: w - 1, y1: h - 1 };
     var bw = b.x1 - b.x0, bh = b.y1 - b.y0;
-    var mid = (b.x0 + b.x1) / 2;
-    function valleyAt(yA, yB) {
-      var prof = new Float64Array(w), x, y;
-      for (y = yA; y < yB; y++) {
-        var base = y * w;
-        for (x = 0; x < w; x++) prof[x] += gray[base + x];
+    var mid = (b.y0 + b.y1) / 2;
+    function valleyAt(xA, xB) {
+      var prof = new Float64Array(h), x, y;
+      for (x = xA; x < xB; x++) {
+        for (y = 0; y < h; y++) prof[y] += gray[y * w + x];
       }
-      var rows = Math.max(1, yB - yA);
-      for (x = 0; x < w; x++) prof[x] /= rows;
-      prof = smooth(prof, Math.max(1, Math.round(bw * 0.006)));
-      var d1 = Math.max(3, Math.round(bw * 0.06)), d2 = Math.max(1, Math.round(bw * 0.015));
-      var lo = Math.round(b.x0 + bw * 0.32), hi = Math.round(b.x0 + bw * 0.68);
-      var best = -Infinity, bestX = mid;
-      for (x = Math.max(lo, d1); x <= Math.min(hi, w - 1 - d1); x++) {
+      var cols = Math.max(1, xB - xA);
+      for (y = 0; y < h; y++) prof[y] /= cols;
+      prof = smooth(prof, Math.max(1, Math.round(bh * 0.006)));
+      var d1 = Math.max(3, Math.round(bh * 0.06)), d2 = Math.max(1, Math.round(bh * 0.015));
+      var lo = Math.round(b.y0 + bh * 0.32), hi = Math.round(b.y0 + bh * 0.68);
+      var best = -Infinity, bestY = mid;
+      for (y = Math.max(lo, d1); y <= Math.min(hi, h - 1 - d1); y++) {
         var side = 0, k;
-        for (k = d2; k <= d1; k++) side += prof[x - k] + prof[x + k];
+        for (k = d2; k <= d1; k++) side += prof[y - k] + prof[y + k];
         side /= 2 * (d1 - d2 + 1);
-        var depth = side - prof[x];
-        var score = depth - 40 * Math.abs(x - mid) / bw;
-        if (score > best) { best = score; bestX = x; }
+        var depth = side - prof[y];
+        var score = depth - 40 * Math.abs(y - mid) / bh;
+        if (score > best) { best = score; bestY = y; }
       }
-      return best > 2 ? bestX : mid;
+      return best > 2 ? bestY : mid;
     }
-    var yTopA = Math.round(b.y0 + bh * 0.1), yTopB = Math.round(b.y0 + bh * 0.5);
-    var yBotA = yTopB, yBotB = Math.round(b.y0 + bh * 0.9);
-    var xa = valleyAt(yTopA, yTopB), xb = valleyAt(yBotA, yBotB);
-    // Mediciones incoherentes: usar un lomo vertical.
-    if (Math.abs(xa - xb) > bw * 0.08) { xa = xb = (xa + xb) / 2; }
-    var ya = (yTopA + yTopB) / 2, yb = (yBotA + yBotB) / 2;
-    var slope = (xb - xa) / (yb - ya);
+    var xLeftA = Math.round(b.x0 + bw * 0.1), xLeftB = Math.round(b.x0 + bw * 0.5);
+    var xRightA = xLeftB, xRightB = Math.round(b.x0 + bw * 0.9);
+    var ya = valleyAt(xLeftA, xLeftB), yb = valleyAt(xRightA, xRightB);
+    // Mediciones incoherentes: usar un lomo horizontal.
+    if (Math.abs(ya - yb) > bh * 0.08) { ya = yb = (ya + yb) / 2; }
+    var xa = (xLeftA + xLeftB) / 2, xb = (xRightA + xRightB) / 2;
+    var slope = (yb - ya) / (xb - xa);
     return {
-      xTop: clamp(xa + slope * (b.y0 - ya), 0, w - 1),
-      xBottom: clamp(xa + slope * (b.y1 - ya), 0, w - 1)
+      yLeft: clamp(ya + slope * (b.x0 - xa), 0, h - 1),
+      yRight: clamp(ya + slope * (b.x1 - xa), 0, h - 1)
     };
   }
 
@@ -163,18 +162,18 @@
     return {
       tl: [b.x0 / W, b.y0 / H], tr: [b.x1 / W, b.y0 / H],
       br: [b.x1 / W, b.y1 / H], bl: [b.x0 / W, b.y1 / H],
-      st: [s.xTop / W, b.y0 / H], sb: [s.xBottom / W, b.y1 / H]
+      sl: [b.x0 / W, s.yLeft / H], sr: [b.x1 / W, s.yRight / H]
     };
   }
 
   function fullFramePoints() {
-    return { tl: [0, 0], tr: [1, 0], br: [1, 1], bl: [0, 1], st: [0.5, 0], sb: [0.5, 1] };
+    return { tl: [0, 0], tr: [1, 0], br: [1, 1], bl: [0, 1], sl: [0, 0.5], sr: [1, 0.5] };
   }
 
-  /* Cuadriláteros de página en orden de lectura (TL, TR, BR, BL). */
+  /* Cuadriláteros de página en orden de lectura (TL, TR, BR, BL): arriba y abajo. */
   function pageQuads(mode, p) {
     if (mode === 'single') return [[p.tl, p.tr, p.br, p.bl]];
-    return [[p.tl, p.st, p.sb, p.bl], [p.st, p.tr, p.br, p.sb]];
+    return [[p.tl, p.tr, p.sr, p.sl], [p.sl, p.sr, p.br, p.bl]];
   }
 
   function dist(a, b) { var dx = a[0] - b[0], dy = a[1] - b[1]; return Math.sqrt(dx * dx + dy * dy); }

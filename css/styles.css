@@ -241,7 +241,7 @@ svg { flex: none; }
 .live video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .live-guide { position: absolute; inset: 0; pointer-events: none; display: grid; place-items: center; }
 .guide-frame { position: absolute; inset: 12% 6%; border: 2px solid rgba(255, 255, 255, .55); border-radius: 6px; }
-.guide-spine { position: absolute; top: 12%; bottom: 12%; left: 50%; border-left: 2px dashed #f5d547; }
+.guide-spine { position: absolute; left: 6%; right: 6%; top: 50%; border-top: 2px dashed #f5d547; }
 .live.single .guide-spine { display: none; }
 .live-top {
   position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px;

@@ -350,7 +350,7 @@
   /* ---------- Editor ---------- */
   var ed = null; // { rec, src (canvas rotado), drag }
   var stage = $('ed-stage'), frame = $('ed-frame'), edCanvas = $('ed-canvas'), overlay = $('ed-overlay'), loupe = $('ed-loupe');
-  var HANDLE_KEYS = ['tl', 'tr', 'br', 'bl', 'st', 'sb'];
+  var HANDLE_KEYS = ['tl', 'tr', 'br', 'bl', 'sl', 'sr'];
   var edModeSeg = seg($('ed-mode'), 'double', function (v) {
     if (!ed) return;
     ed.rec.mode = v;
@@ -415,12 +415,12 @@
     });
     var keys = ed.rec.mode === 'single' ? HANDLE_KEYS.slice(0, 4) : HANDLE_KEYS;
     if (ed.rec.mode !== 'single') {
-      html += '<line class="spine" x1="' + p.st[0] * W + '" y1="' + p.st[1] * H + '" x2="' + p.sb[0] * W + '" y2="' + p.sb[1] * H + '"/>';
+      html += '<line class="spine" x1="' + p.sl[0] * W + '" y1="' + p.sl[1] * H + '" x2="' + p.sr[0] * W + '" y2="' + p.sr[1] * H + '"/>';
     }
-    var names = { tl: 'esquina superior izquierda', tr: 'esquina superior derecha', br: 'esquina inferior derecha', bl: 'esquina inferior izquierda', st: 'lomo arriba', sb: 'lomo abajo' };
+    var names = { tl: 'esquina superior izquierda', tr: 'esquina superior derecha', br: 'esquina inferior derecha', bl: 'esquina inferior izquierda', sl: 'lomo izquierda', sr: 'lomo derecha' };
     keys.forEach(function (key) {
       var x = p[key][0] * W, y = p[key][1] * H;
-      var spine = key === 'st' || key === 'sb';
+      var spine = key === 'sl' || key === 'sr';
       html += '<circle class="handle' + (spine ? ' handle-spine' : '') + '" cx="' + x + '" cy="' + y + '" r="' + (9 * k) + '"/>';
       html += '<circle class="hit" data-key="' + key + '" cx="' + x + '" cy="' + y + '" r="' + (26 * k) + '" tabindex="0" role="slider" aria-label="' + names[key] + '. Flechas para mover" aria-valuetext="' + Math.round(p[key][0] * 100) + '%, ' + Math.round(p[key][1] * 100) + '%"/>';
     });

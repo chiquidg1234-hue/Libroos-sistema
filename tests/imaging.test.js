@@ -3,8 +3,8 @@ const test = require('node:test');
 const assert = require('node:assert');
 const Img = require('../js/imaging.js');
 
-function syntheticSpread({ w = 400, h = 280, spineTop = 0.47, spineBottom = 0.49, book = [0.1, 0.12, 0.9, 0.9] } = {}) {
-  // Mesa oscura, libro claro, surco del lomo oscuro y algo de "texto".
+function syntheticSpread({ w = 400, h = 280, spineLeft = 0.47, spineRight = 0.49, book = [0.1, 0.12, 0.9, 0.9] } = {}) {
+  // Mesa oscura, libro claro, surco del lomo horizontal oscuro y algo de "texto".
   const img = Img.makeImage(w, h);
   const [bx0, by0, bx1, by1] = book.map((v, i) => Math.round(v * (i % 2 ? h : w)));
   for (let y = 0; y < h; y++) {
@@ -12,11 +12,11 @@ function syntheticSpread({ w = 400, h = 280, spineTop = 0.47, spineBottom = 0.49
       let v = 60;
       if (x >= bx0 && x <= bx1 && y >= by0 && y <= by1) {
         v = 235;
-        const t = (y - by0) / (by1 - by0);
-        const sx = (spineTop + (spineBottom - spineTop) * t) * w;
-        const dd = Math.abs(x - sx);
+        const t = (x - bx0) / (bx1 - bx0);
+        const sy = (spineLeft + (spineRight - spineLeft) * t) * h;
+        const dd = Math.abs(y - sy);
         if (dd < 12) v -= (12 - dd) * 12;
-        if (y % 9 < 2 && (x * 7) % 13 < 8 && dd > 20) v = 50;
+        if (x % 9 < 2 && (y * 7) % 13 < 8 && dd > 20) v = 50;
       }
       const i = (y * w + x) * 4;
       img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
@@ -36,15 +36,15 @@ test('la homografía lleva cada esquina a su destino', () => {
   });
 });
 
-test('detecta los bordes del libro y el lomo inclinado', () => {
+test('detecta los bordes del libro y el lomo horizontal inclinado', () => {
   const img = syntheticSpread();
   const p = Img.autoDetect(img);
   assert.ok(Math.abs(p.tl[0] - 0.1) < 0.03, 'borde izquierdo ' + p.tl[0]);
   assert.ok(Math.abs(p.br[0] - 0.9) < 0.03, 'borde derecho ' + p.br[0]);
   assert.ok(Math.abs(p.tl[1] - 0.12) < 0.03, 'borde superior ' + p.tl[1]);
   assert.ok(Math.abs(p.br[1] - 0.9) < 0.03, 'borde inferior ' + p.br[1]);
-  assert.ok(Math.abs(p.st[0] - 0.47) < 0.02, 'lomo arriba ' + p.st[0]);
-  assert.ok(Math.abs(p.sb[0] - 0.49) < 0.02, 'lomo abajo ' + p.sb[0]);
+  assert.ok(Math.abs(p.sl[1] - 0.47) < 0.02, 'lomo izquierda ' + p.sl[1]);
+  assert.ok(Math.abs(p.sr[1] - 0.49) < 0.02, 'lomo derecha ' + p.sr[1]);
 });
 
 test('una foto de solo página devuelve el cuadro completo', () => {
@@ -53,7 +53,7 @@ test('una foto de solo página devuelve el cuadro completo', () => {
   assert.ok(p.tl[0] < 0.03 && p.br[0] > 0.97);
 });
 
-test('divide en dos páginas y endereza', () => {
+test('divide en página de arriba y de abajo, y endereza', () => {
   const img = syntheticSpread();
   const pts = Img.autoDetect(img);
   const quads = Img.pageQuads('double', pts).map(q => q.map(([x, y]) => [x * (img.width - 1), y * (img.height - 1)]));
@@ -61,7 +61,7 @@ test('divide en dos páginas y endereza', () => {
   const size = Img.quadSize(quads[0]);
   const out = Img.warpQuad(img, quads[0], Math.round(size.w), Math.round(size.h));
   assert.strictEqual(out.width, Math.round(size.w));
-  // El centro de la página izquierda es papel claro, no mesa.
+  // El centro de la página de arriba es papel claro, no mesa.
   const c = ((out.height >> 1) * out.width + (out.width >> 1)) * 4;
   assert.ok(out.data[c] > 40);
   assert.strictEqual(Img.pageQuads('single', pts).length, 1);
