@@ -75,6 +75,7 @@
           <li>Alinea el lomo del libro con la línea horizontal de la guía: página de arriba y de abajo.</li>
           <li>Aplana las páginas con los dedos en los márgenes; después puedes recortarlos.</li>
           <li>Si una foto queda mal separada, tócala y arrastra los puntos.</li>
+          <li>Para un PDF solo con algunas páginas, toca "Seleccionar fotos" o escribe los rangos al crear el PDF.</li>
         </ul>
       </details>
     </section>
@@ -89,6 +90,18 @@
             <button type="button" role="radio" data-value="gray">Grises</button>
             <button type="button" role="radio" data-value="bw">B/N</button>
             <button type="button" role="radio" data-value="original">Original</button>
+          </div>
+        </div>
+      </div>
+      <div class="select-row" id="select-row" hidden>
+        <button type="button" class="btn btn-small" id="btn-select" aria-pressed="false">Seleccionar fotos</button>
+        <div class="select-bar" id="select-bar" hidden>
+          <span id="select-count" aria-live="polite">0 seleccionadas</span>
+          <div class="select-actions">
+            <button type="button" class="btn btn-small" id="sel-all">Todas</button>
+            <button type="button" class="btn btn-small" id="sel-none">Ninguna</button>
+            <button type="button" class="btn btn-small btn-danger" id="sel-delete" disabled>Eliminar</button>
+            <button type="button" class="btn btn-small btn-primary" id="sel-pdf" disabled>Crear PDF con estas</button>
           </div>
         </div>
       </div>
@@ -199,6 +212,18 @@
       <span class="input-suffix"><input type="text" id="pdf-name" autocomplete="off" spellcheck="false"><em>.pdf</em></span>
     </label>
     <fieldset class="field">
+      <legend>Páginas a incluir</legend>
+      <div class="seg seg-wide" role="radiogroup" id="pdf-scope">
+        <button type="button" role="radio" data-value="all">Todo el libro</button>
+        <button type="button" role="radio" data-value="custom">Elegir páginas</button>
+      </div>
+      <div class="pages-picker" id="pages-picker" hidden>
+        <textarea id="pdf-pages" rows="3" placeholder="1-10&#10;11-30&#10;1, 10, 20, 35" spellcheck="false" aria-describedby="pages-help"></textarea>
+        <small class="field-note" id="pages-help">Cada línea es un PDF aparte. Usa guiones para rangos (1-10) y comas para páginas sueltas (1, 10, 20).</small>
+        <p class="field-note" id="pages-summary" aria-live="polite"></p>
+      </div>
+    </fieldset>
+    <fieldset class="field">
       <legend>Tamaño de hoja</legend>
       <div class="seg seg-wide" role="radiogroup" id="pdf-size">
         <button type="button" role="radio" data-value="photo">Como el libro</button>
@@ -224,12 +249,7 @@
       <span id="pdf-progress-text">Preparando…</span>
     </div>
     <div class="sheet-result" id="pdf-result" hidden>
-      <p id="pdf-result-text"></p>
-      <div class="sheet-actions">
-        <button type="button" class="btn btn-primary" id="pdf-download">Descargar PDF</button>
-        <button type="button" class="btn" id="pdf-share" hidden>Compartir</button>
-        <button type="button" class="btn" id="pdf-text" hidden>Descargar texto</button>
-      </div>
+      <div id="pdf-result-list"></div>
     </div>
     <button type="submit" class="btn btn-primary btn-block" id="pdf-build">Crear PDF</button>
   </form>

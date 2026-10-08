@@ -15,7 +15,8 @@ Es una app web: funciona en el navegador del celular o la computadora, **sin ser
 | 5. Acabado | **Escáner** (papel blanco, sin sombra del lomo, conserva colores), **Grises**, **B/N** (texto nítido, archivo liviano) u **Original**. Se elige para todo el libro y se puede cambiar por foto. |
 | 6. Ordenar | Numeración de páginas automática, mover fotos antes/después, eliminar con "Deshacer". |
 | 7. OCR | Opción **Texto buscable**: reconoce el texto en español (Tesseract, dentro del teléfono) y lo agrega como capa invisible. En el PDF puedes buscar palabras, seleccionar y copiar. También se puede bajar todo el texto como `.txt`. |
-| 8. PDF | Nombre del archivo, tamaño de hoja (como el libro, A4 o Carta) y calidad (Alta / Media / Liviana). Botón **Descargar PDF** y, en el celular, **Compartir** (WhatsApp, Drive, correo…). |
+| 8. Elegir páginas | En "Crear PDF", **Elegir páginas** acepta rangos (`1-10`) y páginas sueltas (`1, 10, 20, 35`). Cada línea del cuadro de texto se exporta como un **PDF aparte**: escribe `1-10` en una línea y `11-30` en la siguiente para dividir el libro en dos PDF de una sola vez. También se puede tocar **Seleccionar fotos** en la lista, marcar algunas y tocar **Crear PDF con estas**, que llena el rango automáticamente. |
+| 9. PDF | Nombre del archivo, tamaño de hoja (como el libro, A4 o Carta) y calidad (Alta / Media / Liviana). Botón **Descargar PDF** y, en el celular, **Compartir** (WhatsApp, Drive, correo…). Si se generó más de un PDF, un botón **Descargar todos** los baja en fila. |
 
 Las fotos quedan guardadas en el navegador (IndexedDB): si el teléfono recarga la página al abrir la cámara, no se pierde nada. Una vez abierta, la app funciona sin conexión y se puede instalar en la pantalla de inicio.
 
