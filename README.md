@@ -9,14 +9,15 @@ Es una app web: funciona en el navegador del celular o la computadora, **sin ser
 | Paso | Detalle |
 | --- | --- |
 | 1. Capturar | **Cámara continua** (varias fotos seguidas, con línea guía para el lomo y linterna), **cámara del teléfono** (máxima calidad) o **subir fotos** de la galería, muchas a la vez. |
-| 2. Separar | Detecta automáticamente los bordes del libro y el lomo (aunque esté un poco inclinado) y divide cada foto en página izquierda y derecha. Para tapas o páginas sueltas se elige "1 página". |
+| 2. Separar | Detecta automáticamente los bordes del libro y el lomo (aunque esté un poco inclinado) y divide cada foto en página de arriba y de abajo. Para tapas o páginas sueltas se elige "1 página". |
 | 3. Ajustar | Tocando una foto se abre el editor: se arrastran las 4 esquinas y los 2 puntos del lomo (con lupa para precisión). Botones para girar, volver a detectar o usar la foto entera. |
 | 4. Enderezar | Corrige la perspectiva de cada página (si la foto se tomó en ángulo, queda rectangular). |
 | 5. Acabado | **Escáner** (papel blanco, sin sombra del lomo, conserva colores), **Grises**, **B/N** (texto nítido, archivo liviano) u **Original**. Se elige para todo el libro y se puede cambiar por foto. |
-| 6. Ordenar | Numeración de páginas automática, mover fotos antes/después, eliminar con "Deshacer". |
+| 6. Ordenar | Numeración de páginas automática, mover fotos antes/después (una o varias seleccionadas a la vez), eliminar con "Deshacer". |
 | 7. OCR | Opción **Texto buscable**: reconoce el texto en español (Tesseract, dentro del teléfono) y lo agrega como capa invisible. En el PDF puedes buscar palabras, seleccionar y copiar. También se puede bajar todo el texto como `.txt`. |
 | 8. Elegir páginas | En "Crear PDF", **Elegir páginas** acepta rangos (`1-10`) y páginas sueltas (`1, 10, 20, 35`). Cada línea del cuadro de texto se exporta como un **PDF aparte**: escribe `1-10` en una línea y `11-30` en la siguiente para dividir el libro en dos PDF de una sola vez. También se puede tocar **Seleccionar fotos** en la lista, marcar algunas y tocar **Crear PDF con estas**, que llena el rango automáticamente. |
 | 9. PDF | Nombre del archivo, tamaño de hoja (como el libro, A4 o Carta) y calidad (Alta / Media / Liviana). Botón **Descargar PDF** y, en el celular, **Compartir** (WhatsApp, Drive, correo…). Si se generó más de un PDF, un botón **Descargar todos** los baja en fila. |
+| 10. Apoyar | Pantalla de donaciones con compras dentro de la app de Google Play (café, almuerzo, libro). Funciona en la versión instalada desde la Play Store; en el navegador muestra las opciones sin cobrar. |
 
 Las fotos quedan guardadas en el navegador (IndexedDB): si el teléfono recarga la página al abrir la cámara, no se pierde nada. Una vez abierta, la app funciona sin conexión y se puede instalar en la pantalla de inicio.
 
@@ -48,6 +49,10 @@ O cualquier servidor estático (`python3 -m http.server`). También se puede alo
 - Aplana las páginas sujetándolas por los márgenes.
 - Para libros de muchas páginas, "Calidad Media" + acabado "Escáner" o "B/N" da archivos manejables.
 
+## Publicar en Google Play
+
+Pasos completos en [`docs/PLAY_STORE.md`](docs/PLAY_STORE.md): empaquetar con Bubblewrap, verificar el dominio, crear los productos de donación y preparar la ficha.
+
 ## Estructura
 
 ```
@@ -57,6 +62,7 @@ js/imaging.js         detección de bordes y lomo, perspectiva, filtros (funcion
 js/store.js           guardado en IndexedDB
 js/pdf.js             armado del PDF (jsPDF) con capa de texto invisible
 js/ocr.js             reconocimiento de texto (Tesseract.js, español)
+js/donate.js          donaciones con Google Play Billing (Digital Goods API)
 js/sample.js          foto de ejemplo generada
 js/app.js             captura, lista, editor, exportación
 vendor/jspdf.umd.min.js  jsPDF 2.5.2 (MIT), incluido para funcionar sin conexión
